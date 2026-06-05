@@ -1,0 +1,33 @@
+services:
+  # 1. Cấu hình cho Database
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: hr_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: hr_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Ánh xạ file SQL vào thư mục khởi tạo của DB
+
+  # 2. Cấu hình cho Backend
+  backend:
+    build: .
+    container_name: hr_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/hr_management
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - postgres-db
+
+volumes:
+  postgres_data:
